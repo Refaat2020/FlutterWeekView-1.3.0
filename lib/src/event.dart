@@ -16,7 +16,7 @@ typedef EventTextBuilder<T> = Widget Function(
 );
 
 /// Represents a flutter week view event.
-class FlutterWeekViewEvent<T> extends Comparable<FlutterWeekViewEvent<T>> {
+class FlutterWeekViewEvent<T> implements Comparable<FlutterWeekViewEvent<T>> {
   /// The event title.
   final String title;
 
