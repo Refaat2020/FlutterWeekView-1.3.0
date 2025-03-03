@@ -7,6 +7,7 @@ import 'package:flutter_week_view/src/widgets/day_view.dart';
 
 /// Builds an event text widget.
 typedef EventTextBuilder<T> = Widget Function(
+  T? data,
   FlutterWeekViewEvent<T> event,
   BuildContext context,
   DayView dayView,
