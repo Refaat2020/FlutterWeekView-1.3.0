@@ -91,6 +91,7 @@ class FlutterWeekViewEvent<T> implements Comparable<FlutterWeekViewEvent<T>> {
         margin: margin,
         padding: padding,
         child: (eventTextBuilder ?? DefaultBuilders.defaultEventTextBuilder)(
+          data,
           this,
           context,
           dayView,
