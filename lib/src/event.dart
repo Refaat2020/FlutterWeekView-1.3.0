@@ -6,11 +6,16 @@ import 'package:flutter_week_view/src/utils/utils.dart';
 import 'package:flutter_week_view/src/widgets/day_view.dart';
 
 /// Builds an event text widget.
-typedef EventTextBuilder = Widget Function(FlutterWeekViewEvent event,
-    BuildContext context, DayView dayView, double height, double width);
+typedef EventTextBuilder<T> = Widget Function(
+  FlutterWeekViewEvent<T> event,
+  BuildContext context,
+  DayView dayView,
+  double height,
+  double width,
+);
 
 /// Represents a flutter week view event.
-class FlutterWeekViewEvent extends Comparable<FlutterWeekViewEvent> {
+class FlutterWeekViewEvent<T> extends Comparable<FlutterWeekViewEvent<T>> {
   /// The event title.
   final String title;
 
@@ -45,7 +50,10 @@ class FlutterWeekViewEvent extends Comparable<FlutterWeekViewEvent> {
   final VoidCallback? onLongPress;
 
   /// The event text builder.
-  final EventTextBuilder? eventTextBuilder;
+  final EventTextBuilder<T>? eventTextBuilder;
+
+  /// Generic object to hold additional event data.
+  final T? data;
 
   /// Creates a new flutter week view event instance.
   FlutterWeekViewEvent({
@@ -61,6 +69,7 @@ class FlutterWeekViewEvent extends Comparable<FlutterWeekViewEvent> {
     this.onTap,
     this.onLongPress,
     this.eventTextBuilder,
+    this.data, // Accept generic data
   })  : start = start.yearMonthDayHourMinute,
         end = end.yearMonthDayHourMinute;
 
@@ -99,7 +108,7 @@ class FlutterWeekViewEvent extends Comparable<FlutterWeekViewEvent> {
   }
 
   @override
-  int compareTo(FlutterWeekViewEvent other) {
+  int compareTo(FlutterWeekViewEvent<T> other) {
     int result = start.compareTo(other.start);
     if (result != 0) {
       return result;
