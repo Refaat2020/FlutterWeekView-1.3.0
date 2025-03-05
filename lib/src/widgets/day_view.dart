@@ -55,7 +55,9 @@ class DayView extends ZoomableHeadersWidget<DayViewStyle, DayViewController> {
         super(
           style: style ?? DayViewStyle.fromDate(date: date),
           controller: controller ?? DayViewController(),
-          initialTime: initialTime?.atDate(date) ?? (Utils.sameDay(date) ? HourMinute.now() : const HourMinute()).atDate(date),
+          initialTime: initialTime?.atDate(date) ??
+              (Utils.sameDay(date) ? HourMinute.now() : const HourMinute())
+                  .atDate(date),
         );
 
   @override
@@ -65,7 +67,8 @@ class DayView extends ZoomableHeadersWidget<DayViewStyle, DayViewController> {
 /// The day view state.
 class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
   /// Contains all events draw properties.
-  final Map<FlutterWeekViewEvent, EventDrawProperties> eventsDrawProperties = HashMap();
+  final Map<FlutterWeekViewEvent, EventDrawProperties> eventsDrawProperties =
+      HashMap();
 
   /// The flutter week view events.
   late List<FlutterWeekViewEvent> events;
@@ -124,9 +127,14 @@ class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
           // at the first row of pixels still gives localOffset.dy = 0, so we
           // add the scroll offset to get the proper value for "5:00". We also
           // adjust for the header.
-          Offset correctedOffset = Offset(localOffset.dx, localOffset.dy + (verticalScrollController?.offset ?? 0) - widget.style.headerSize);
+          Offset correctedOffset = Offset(
+              localOffset.dx,
+              localOffset.dy +
+                  (verticalScrollController?.offset ?? 0) -
+                  widget.style.headerSize);
 
-          DateTime newStartTime = widget.date.add(calculateOffsetHourMinute(correctedOffset).asDuration);
+          DateTime newStartTime = widget.date
+              .add(calculateOffsetHourMinute(correctedOffset).asDuration);
           widget.dragAndDropOptions!.onEventDragged(details.data, newStartTime);
         },
       );
@@ -168,7 +176,8 @@ class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
   }
 
   @override
-  void onZoomFactorChanged(DayViewController controller, ScaleUpdateDetails details) {
+  void onZoomFactorChanged(
+      DayViewController controller, ScaleUpdateDetails details) {
     super.onZoomFactorChanged(controller, details);
 
     if (mounted) {
@@ -187,7 +196,8 @@ class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
       children.add(Positioned.fill(
         child: GestureDetector(
           onTapUp: (details) {
-            DateTime timeTapped = widget.date.add(calculateOffsetHourMinute(details.localPosition).asDuration);
+            DateTime timeTapped = widget.date.add(
+                calculateOffsetHourMinute(details.localPosition).asDuration);
             widget.onBackgroundTappedDown!(timeTapped);
           },
           child: Container(color: Colors.transparent),
@@ -195,12 +205,13 @@ class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
       ));
     }
 
-    children.addAll(eventsDrawProperties.entries.map((entry) => entry.value.createWidget(
-          context,
-          widget,
-          buildResizeGestureDetector(entry.key),
-          entry.key,
-        )));
+    children.addAll(
+        eventsDrawProperties.entries.map((entry) => entry.value.createWidget(
+              context,
+              widget,
+              buildResizeGestureDetector(entry.key),
+              entry.key,
+            )));
 
     if (widget.hoursColumnStyle.width > 0) {
       children.add(Positioned(
@@ -210,9 +221,12 @@ class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
       ));
     }
 
-    if (Utils.sameDay(widget.date) && widget.minimumTime.atDate(widget.date).isBefore(DateTime.now()) && widget.maximumTime.atDate(widget.date).isAfter(DateTime.now())) {
-      Widget? currentTimeIndicator =
-          (widget.currentTimeIndicatorBuilder ?? DefaultBuilders.defaultCurrentTimeIndicatorBuilder)(widget.style, calculateTopOffset, widget.hoursColumnStyle.width, widget.isRTL);
+    if (Utils.sameDay(widget.date) &&
+        widget.minimumTime.atDate(widget.date).isBefore(DateTime.now()) &&
+        widget.maximumTime.atDate(widget.date).isAfter(DateTime.now())) {
+      Widget? currentTimeIndicator = (widget.currentTimeIndicatorBuilder ??
+              DefaultBuilders.defaultCurrentTimeIndicatorBuilder)(widget.style,
+          calculateTopOffset, widget.hoursColumnStyle.width, widget.isRTL);
       if (currentTimeIndicator != null) {
         children.add(currentTimeIndicator);
       }
@@ -260,7 +274,8 @@ class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
         });
         widget.resizeEventOptions!.onEventResized(event, newEventEnd);
       },
-      onVerticalDragUpdate: (details) => onEventResizeUpdate(event, details.primaryDelta ?? 0),
+      onVerticalDragUpdate: (details) =>
+          onEventResizeUpdate(event, details.primaryDelta ?? 0),
       child: MouseRegion(
         cursor: SystemMouseCursors.resizeUpDown,
         child: Container(color: Colors.transparent),
@@ -274,7 +289,8 @@ class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
     accumulatedResizeOffset += resizeOffset;
 
     // Compute the Duration equivalent to the accumulated offset.
-    double hourRowHeight = calculateTopOffset(widget.minimumTime.add(const HourMinute(hour: 1)));
+    double hourRowHeight =
+        calculateTopOffset(widget.minimumTime.add(const HourMinute(hour: 1)));
     double hourMinutesInHour = accumulatedResizeOffset / hourRowHeight;
     int hour = hourMinutesInHour.floor();
     int minute = ((hourMinutesInHour - hour) * 60).round();
@@ -283,14 +299,16 @@ class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
     // To prevent a user from decreasing the size of an event indefinitely,
     // we check if the new duration will be shorter than a minimum allowed
     // event duration.
-    Duration newEventDuration = originalResizeEventEnd.add(delta).difference(event.start);
+    Duration newEventDuration =
+        originalResizeEventEnd.add(delta).difference(event.start);
     Duration minimumDuration = widget.resizeEventOptions!.minimumEventDuration;
 
     // We also handle the (rare) case where the event's duration was originally
     // shorter than the allowed minimum duration. This is to avoid that, upon
     // the beginning of resizing the short event, it already grows to be as
     // long as the minimum duration.
-    Duration originalEventDuration = originalResizeEventEnd.difference(event.start);
+    Duration originalEventDuration =
+        originalResizeEventEnd.difference(event.start);
     if (minimumDuration > originalEventDuration) {
       minimumDuration = originalEventDuration;
     }
@@ -301,9 +319,11 @@ class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
     } else {
       // Otherwise, we compute the new event end normally.
       DateTime newEventEnd = originalResizeEventEnd.add(delta);
-      Duration gridGranularity = widget.resizeEventOptions!.snapToGridGranularity;
+      Duration gridGranularity =
+          widget.resizeEventOptions!.snapToGridGranularity;
       if (gridGranularity > Duration.zero) {
-        newEventEnd = roundTimeToFitGrid(newEventEnd, gridGranularity: gridGranularity);
+        newEventEnd =
+            roundTimeToFitGrid(newEventEnd, gridGranularity: gridGranularity);
       }
       event.end = newEventEnd;
     }
@@ -330,17 +350,28 @@ class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
     events = List.of(widget.events)..sort();
   }
 
+  static const double _minEventHeight = 35.0; // Set a reasonable minimum height
+
   /// Creates the events draw properties and add them to the current list.
   void createEventsDrawProperties() {
     EventGrid eventsGrid = EventGrid();
+
     for (FlutterWeekViewEvent event in List.of(events)) {
-      EventDrawProperties drawProperties = eventsDrawProperties[event] ?? EventDrawProperties(widget, event, widget.isRTL);
+      EventDrawProperties drawProperties = eventsDrawProperties[event] ??
+          EventDrawProperties(widget, event, widget.isRTL);
+
       if (!drawProperties.shouldDraw) {
         events.remove(event);
         continue;
       }
 
       drawProperties.calculateTopAndHeight(calculateTopOffset);
+      // Ensure event has at least the minimum height
+      if (drawProperties.height != null &&
+          drawProperties.height! < _minEventHeight) {
+        drawProperties.height = _minEventHeight;
+      }
+
       if (drawProperties.left == null || drawProperties.width == null) {
         eventsGrid.add(drawProperties);
       }
@@ -349,8 +380,11 @@ class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
     }
 
     if (eventsGrid.drawPropertiesList.isNotEmpty) {
-      double eventsColumnWidth = (context.findRenderObject() as RenderBox).size.width - widget.hoursColumnStyle.width;
-      eventsGrid.processEvents(widget.hoursColumnStyle.width, eventsColumnWidth);
+      double eventsColumnWidth =
+          (context.findRenderObject() as RenderBox).size.width -
+              widget.hoursColumnStyle.width;
+      eventsGrid.processEvents(
+          widget.hoursColumnStyle.width, eventsColumnWidth);
     }
   }
 }

@@ -11,14 +11,16 @@ class EventGrid {
   List<EventDrawProperties> drawPropertiesList = [];
 
   /// Adds a flutter week view event draw properties.
-  void add(EventDrawProperties drawProperties) => drawPropertiesList.add(drawProperties);
+  void add(EventDrawProperties drawProperties) =>
+      drawPropertiesList.add(drawProperties);
 
   /// Processes all display properties added to the grid.
   void processEvents(double hoursColumnWidth, double eventsColumnWidth) {
     List<List<EventDrawProperties>> columns = [];
     DateTime? lastEventEnding;
     for (EventDrawProperties drawProperties in drawPropertiesList) {
-      if (lastEventEnding != null && drawProperties.start!.isAfter(lastEventEnding)) {
+      if (lastEventEnding != null &&
+          drawProperties.start!.isAfter(lastEventEnding)) {
         packEvents(columns, hoursColumnWidth, eventsColumnWidth);
         columns.clear();
         lastEventEnding = null;
@@ -37,7 +39,8 @@ class EventGrid {
         columns.add([drawProperties]);
       }
 
-      if (lastEventEnding == null || drawProperties.end!.compareTo(lastEventEnding) > 0) {
+      if (lastEventEnding == null ||
+          drawProperties.end!.compareTo(lastEventEnding) > 0) {
         lastEventEnding = drawProperties.end;
       }
     }
@@ -48,21 +51,30 @@ class EventGrid {
   }
 
   /// Sets the left and right positions for each event in the connected group.
-  void packEvents(List<List<EventDrawProperties>> columns, double hoursColumnWidth, double eventsColumnWidth) {
+  void packEvents(List<List<EventDrawProperties>> columns,
+      double hoursColumnWidth, double eventsColumnWidth) {
+    double padding = 4.0; // Add spacing between events
+
     for (int columnIndex = 0; columnIndex < columns.length; columnIndex++) {
       List<EventDrawProperties> column = columns[columnIndex];
       for (EventDrawProperties drawProperties in column) {
-        drawProperties.left = hoursColumnWidth + (columnIndex / columns.length) * eventsColumnWidth;
+        drawProperties.left = hoursColumnWidth +
+            (columnIndex / columns.length) * eventsColumnWidth;
+
         int colSpan = calculateColSpan(columns, drawProperties, columnIndex);
-        drawProperties.width = (eventsColumnWidth * colSpan) / (columns.length);
+        drawProperties.width =
+            (eventsColumnWidth * colSpan) / (columns.length) - padding;
       }
     }
   }
 
   /// Checks how many columns the event can expand into, without colliding with other events.
-  int calculateColSpan(List<List<EventDrawProperties>> columns, EventDrawProperties drawProperties, int column) {
+  int calculateColSpan(List<List<EventDrawProperties>> columns,
+      EventDrawProperties drawProperties, int column) {
     int colSpan = 1;
-    for (int columnIndex = column + 1; columnIndex < columns.length; columnIndex++) {
+    for (int columnIndex = column + 1;
+        columnIndex < columns.length;
+        columnIndex++) {
       List<EventDrawProperties> column = columns[columnIndex];
       for (EventDrawProperties other in column) {
         if (drawProperties.collidesWith(other)) {
@@ -104,7 +116,9 @@ class EventDrawProperties {
     DateTime minimum = dayView.minimumTime.atDate(dayView.date);
     DateTime maximum = dayView.maximumTime.atDate(dayView.date);
 
-    if (shouldDraw || (event.start.isBefore(minimum) && event.end.isBefore(minimum)) || (event.start.isAfter(maximum) && event.end.isAfter(maximum))) {
+    if (shouldDraw ||
+        (event.start.isBefore(minimum) && event.end.isBefore(minimum)) ||
+        (event.start.isAfter(maximum) && event.end.isAfter(maximum))) {
       return;
     }
 
@@ -124,13 +138,24 @@ class EventDrawProperties {
   bool get shouldDraw => start != null && end != null;
 
   /// Calculates the top and the height of the event rectangle.
-  void calculateTopAndHeight(double Function(HourMinute time, {HourMinute minimumTime}) topOffsetCalculator) {
+  void calculateTopAndHeight(
+      double Function(HourMinute time, {HourMinute minimumTime})
+          topOffsetCalculator) {
     if (!shouldDraw) {
       return;
     }
 
+    double spacing = 3.0; // Add vertical spacing
     top = topOffsetCalculator(HourMinute.fromDateTime(dateTime: start!));
-    height = topOffsetCalculator(HourMinute.fromDuration(duration: end!.difference(start!)), minimumTime: HourMinute.min) + 1;
+
+    double calculatedHeight = topOffsetCalculator(
+            HourMinute.fromDuration(duration: end!.difference(start!)),
+            minimumTime: HourMinute.min) +
+        1;
+
+    double minHeight = 45; // Ensuring minimum height
+    height = calculatedHeight < minHeight ? minHeight : calculatedHeight;
+    height = height! + spacing; // Adding spacing between events
   }
 
   /// Returns whether this draw properties overlaps another.
@@ -143,7 +168,8 @@ class EventDrawProperties {
   }
 
   /// Creates the event widget.
-  Widget createWidget(BuildContext context, DayView dayView, Widget? resizeGestureDetector, FlutterWeekViewEvent event) {
+  Widget createWidget(BuildContext context, DayView dayView,
+      Widget? resizeGestureDetector, FlutterWeekViewEvent event) {
     Widget child = event.build(context, dayView, height!, width!);
 
     // If drag-and-drop is allowed, we wrap the child in a Draggable widget.
