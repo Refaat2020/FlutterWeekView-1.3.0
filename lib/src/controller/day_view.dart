@@ -7,7 +7,7 @@ class DayViewController extends ZoomController {
 
   /// Creates a new day view controller instance.
   DayViewController({
-    double zoomCoefficient = 0.8,
+    double zoomCoefficient = 0.5,
     double? minZoom,
     double? maxZoom,
     this.onDisposed,

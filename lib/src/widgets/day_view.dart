@@ -169,8 +169,8 @@ class _DayViewState extends ZoomableHeadersWidgetState<DayView> {
     }
 
     return GestureDetector(
-      onScaleStart: widget.controller.scaleStart,
-      onScaleUpdate: widget.controller.scaleUpdate,
+      // onScaleStart: widget.controller.scaleStart,
+      // onScaleUpdate: widget.controller.scaleUpdate,
       child: mainWidget,
     );
   }
